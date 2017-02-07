@@ -11,14 +11,40 @@ import UIKit
 class ViewController: UIViewController {
 
     var events = [Event]()
+    var filteredEvents = [Event]()
     
     @IBOutlet weak var tableView: UITableView!
-    
+    let searchController = UISearchController(searchResultsController: nil)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        setupTableView()
+        setupSearchBar()
+    }
+    
+    private func setupTableView() {
         tableView.estimatedRowHeight = 400
         tableView.rowHeight = UITableViewAutomaticDimension
+    }
+    
+    private func setupSearchBar() {
+        searchController.searchResultsUpdater = self
+        searchController.dimsBackgroundDuringPresentation = false
+        definesPresentationContext = true
+        tableView.tableHeaderView = searchController.searchBar
+        searchController.searchBar.placeholder = "Search for Event by Name" // Name for now, we can make this more complex as needed
+    }
+    
+    func filterEvents(forText searchText: String) {
+        filteredEvents = events.filter({ (event) -> Bool in
+            var matchFound = false
+            if let eventName = event.name {
+                matchFound = eventName.lowercased().contains(searchText.lowercased())
+            }
+            return matchFound
+        })
+        tableView.reloadData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -36,9 +62,23 @@ class ViewController: UIViewController {
     }
 }
 
+extension ViewController: UISearchResultsUpdating, UISearchControllerDelegate {
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text else {
+            return
+        }
+        filterEvents(forText: searchText)
+    }
+
+}
+
 extension ViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if searchController.isActive && searchController.searchBar.text != "" {
+            return filteredEvents.count
+        }
         return events.count
     }
     
@@ -47,7 +87,8 @@ extension ViewController: UITableViewDataSource {
             fatalError("Where is our cell!?? 😱")
         }
         
-        cell.event = events[indexPath.row]
+        let event = searchController.isActive && searchController.searchBar.text != "" ? filteredEvents[indexPath.row] : events[indexPath.row]
+        cell.event = event
         cell.layoutIfNeeded()
         return cell
     }
