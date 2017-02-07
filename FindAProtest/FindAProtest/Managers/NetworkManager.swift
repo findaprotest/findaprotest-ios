@@ -49,13 +49,13 @@ class NetworkManager {
         }
     }
     
-    func getevents(completion: @escaping (Result<[Event]>) -> Void) {
+    func getevents(completion: @escaping (Result<Data>) -> Void) {
         get(urlString: "\(baseURL)\(Endpoint.event)") { (result) in
             switch result {
             case .success(let data):
                 print(data)
                 DispatchQueue.main.async {
-                    completion(.success([Event]()))
+                    completion(.success(data))
                 }
                 break
             case .error(let error):
