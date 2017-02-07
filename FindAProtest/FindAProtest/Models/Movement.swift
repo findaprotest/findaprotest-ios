@@ -9,9 +9,9 @@
 import Foundation
 
 struct Movement {
-    var id: Int
-    var name: String
-    var date: Date
-    var description: String
-    var link: URL
+    var id: Int?
+    var name: String?
+    var date: Date?
+    var description: String?
+    var link: URL?
 }

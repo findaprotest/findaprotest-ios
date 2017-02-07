@@ -9,8 +9,8 @@
 import Foundation
 
 struct Organization {
-    var id: Int
-    var name: String
-    var description: String
-    var link: URL
+    var id: Int?
+    var name: String?
+    var description: String?
+    var link: URL?
 }
