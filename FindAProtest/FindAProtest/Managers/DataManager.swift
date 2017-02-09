@@ -19,17 +19,23 @@ class DataManager {
     fileprivate var _movements = [Movement]()
     fileprivate var _organizations = [Organization]()
     
-    private var shouldGetEvents = true
+    fileprivate var lastEventFetchTime: Date?
+    fileprivate var lastCategoriesFetchTime: Date?
+    fileprivate var lastMovementsFetchTime: Date?
+    fileprivate var lastOrganizationsFetchTime: Date?
     
-    func getEvents(completion: @escaping (Result<[Event]>) -> Void) {
-        if shouldGetEvents {
+    func getEvents(forceNetworkCall: Bool, completion: @escaping (Result<[Event]>) -> Void) {
+        if shouldFetchLatestEvents || forceNetworkCall {
             NetworkManager.sharedInstance.getevents(completion: { (result) in
                 switch result {
                 case .success(let data):
                     do {
                         guard let eventObjects = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves) as? [[String:Any]] else {
-                            let returnError = FAPError(title: "Parse Error", message: "Could not response from server")
-                            completion(.error(returnError))
+                            let returnError = FAPError(title: NSLocalizedString("error.parse_error.title", comment: "Parsing Error Title"),
+                                                       message: NSLocalizedString("error.parse_error.message", comment: "Could not parse response from server."))
+                            DispatchQueue.main.async {
+                                completion(.error(returnError))
+                            }
                             return
                         }
                         var tempEvents = [Event]()
@@ -38,26 +44,67 @@ class DataManager {
                             tempEvents.append(event)
                         }
                         self._events = tempEvents
-                        completion(.success(self.events))
+                        self.lastEventFetchTime = Date()
+                        DispatchQueue.main.async {
+                            completion(.success(self.events))
+                        }
                     } catch {
                         let error = error as NSError
                         let returnError = FAPError(title: error.localizedFailureReason ?? "Error",
                                                    message: error.localizedDescription)
-                        completion(.error(returnError))
-                        
+                        DispatchQueue.main.async {
+                            completion(.error(returnError))
+                        }
                     }
                     break
                 case .error(let error):
-                    completion(.error(error))
+                    DispatchQueue.main.async {
+                        completion(.error(error))
+                    }
                 }
             })
         } else {
-            completion(.success(events))
+            DispatchQueue.main.async {
+                completion(.success(self.events))
+            }
         }
     }
 }
 
-// Event stuff
+
+//MARK: Logic for whether or not to make network calls
+extension DataManager {
+    
+    fileprivate var shouldFetchLatestEvents: Bool {
+        guard let lastFetchTime = lastEventFetchTime else {
+            return true
+        }
+        return abs(lastFetchTime.timeIntervalSinceNow) >= 600 // 5-minute refresh rate
+    }
+    
+    fileprivate var shouldFetchLatestCategories: Bool {
+        guard let lastFetchTime = lastCategoriesFetchTime else {
+            return true
+        }
+        return abs(lastFetchTime.timeIntervalSinceNow) >= 600 // 5-minute refresh rate
+    }
+    
+    fileprivate var shouldFetchLatestMovements: Bool {
+        guard let lastFetchTime = lastMovementsFetchTime else {
+            return true
+        }
+        return abs(lastFetchTime.timeIntervalSinceNow) >= 600 // 5-minute refresh rate
+    }
+    
+    fileprivate var shouldFetchLatest: Bool {
+        guard let lastFetchTime = lastOrganizationsFetchTime else {
+            return true
+        }
+        return abs(lastFetchTime.timeIntervalSinceNow) >= 600 // 5-minute refresh rate
+    }
+}
+
+//MARK: Event handling
 extension DataManager {
     
     var events: [Event] {
@@ -65,7 +112,6 @@ extension DataManager {
     }
     
     func parse(eventObject: [String:Any]) -> Event {
-        dump(eventObject)
         var event = Event()
         event.id = eventObject["id"] as? Int
         event.movementId = eventObject["movementId"] as? Int
@@ -99,4 +145,4 @@ extension DataManager {
     }
 }
 
-// Categories Stuff
+//MARK: Categories handling
