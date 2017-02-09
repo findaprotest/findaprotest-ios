@@ -72,23 +72,16 @@ extension DataManager {
         event.categoryId = eventObject["categoryId"] as? Int
         event.organizationId = eventObject["organizationId"] as? Int
         event.name = eventObject["name"] as? String
-        
-        // ************************************************************************************************//
-        //TODO: Make sure to fix this to get proper times if API is updated to use numbes
-        if let eventTimestampString = eventObject["eventTime"] as? String,
-            let eventTimestamp = Int(eventTimestampString) {
+        if let eventTimestamp = eventObject["eventTime"] as? Int {
             event.time = Date(timeIntervalSince1970: Double(eventTimestamp))
         }
-        if let createdTimestampString = eventObject["createdTime"] as? String,
-            let createdTimestamp = Int(createdTimestampString) {
+        if let createdTimestamp = eventObject["createdTime"] as? Int {
             event.created = Date(timeIntervalSince1970: Double(createdTimestamp))
         }
         
-        if let updatedTimestampString = eventObject["updatedTime"] as? String,
-            let updatedTimestamp = Int(updatedTimestampString) {
+        if let updatedTimestamp = eventObject["updatedTime"] as? Int {
             event.updated = Date(timeIntervalSince1970: Double(updatedTimestamp))
         }
-        // ************************************************************************************************//
         event.city = eventObject["city"] as? String
         event.state = eventObject["state"] as? String
         event.location = eventObject["location"] as? String
