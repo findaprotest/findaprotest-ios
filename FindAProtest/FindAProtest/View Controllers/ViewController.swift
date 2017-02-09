@@ -89,6 +89,7 @@ extension ViewController: UITableViewDataSource {
         
         let event = searchController.isActive && searchController.searchBar.text != "" ? filteredEvents[indexPath.row] : events[indexPath.row]
         cell.event = event
+        cell.selectionStyle = .none
         cell.layoutIfNeeded()
         return cell
     }
