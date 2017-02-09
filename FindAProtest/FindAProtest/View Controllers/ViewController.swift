@@ -16,6 +16,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     let searchController = UISearchController(searchResultsController: nil)
 
+    let eventsRefreshControl = UIRefreshControl()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -26,6 +28,8 @@ class ViewController: UIViewController {
     private func setupTableView() {
         tableView.estimatedRowHeight = 400
         tableView.rowHeight = UITableViewAutomaticDimension
+        eventsRefreshControl.addTarget(self, action: #selector(refreshEvents), for: .valueChanged)
+        tableView.addSubview(eventsRefreshControl)
     }
     
     private func setupSearchBar() {
@@ -49,14 +53,22 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        refreshEvents(sender: nil)
+    }
+    
+    @objc private func refreshEvents(sender: UIRefreshControl?) {
         
-        DataManager.sharedInstance.getEvents { (result) in
+        DataManager.sharedInstance.getEvents(forceNetworkCall: sender != nil) { (result) in
             switch result {
             case .success(let events):
                 self.events = events
                 self.tableView.reloadData()
             case .error(let error):
-                dump(error)
+                self.show(error: error, completion: nil)
+                break
+            }
+            if self.eventsRefreshControl.isRefreshing {
+                self.eventsRefreshControl.endRefreshing()
             }
         }
     }
