@@ -39,8 +39,7 @@ class NetworkManager {
     func getCategories(completion: @escaping (Result<[Category]>) -> Void) {
         get(urlString: "\(baseURL)\(Endpoint.category)") { (result) in
             switch result {
-            case .success(let data):
-                print(data)
+            case .success(_):
                 break
             case .error(let error):
                 print(error)
@@ -53,10 +52,7 @@ class NetworkManager {
         get(urlString: "\(baseURL)\(Endpoint.event)") { (result) in
             switch result {
             case .success(let data):
-                print(data)
-                DispatchQueue.main.async {
                     completion(.success(data))
-                }
                 break
             case .error(let error):
                 print(error)
