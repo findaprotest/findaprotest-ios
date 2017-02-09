@@ -12,7 +12,7 @@ import UIKit
 extension UIViewController {
     
     func show(error: FAPError, completion: (() -> Void)?) {
-        let alertController = UIAlertController(title: error.title, message: error.title, preferredStyle: .alert)
+        let alertController = UIAlertController(title: error.title, message: error.message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
         alertController.addAction(okAction)
         present(alertController, animated: true, completion: completion)
