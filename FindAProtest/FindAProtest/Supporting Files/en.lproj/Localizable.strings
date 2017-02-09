@@ -1,0 +1,11 @@
+/* 
+  Localizable.strings
+  FindAProtest
+
+  Created by Pratikbhai Patel on 2/9/17.
+  Copyright © 2017 Find a Protest. All rights reserved.
+*/
+
+
+"error.parse_error.title" = "Parsing Error";
+"error.parse_error.message" = "Could not parse response from server.";
